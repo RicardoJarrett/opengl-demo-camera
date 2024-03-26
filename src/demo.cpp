@@ -7,12 +7,29 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
 
+extern glm::vec3 pos;
+extern glm::vec3 rot;
+
+void Demo::update_camera() {
+	glm::mat4 new_rot = glm::mat4(1.0f);
+	new_rot = glm::rotate(new_rot, rot.x, glm::vec3(1.0, 0.0, 0.0));
+	new_rot = glm::rotate(new_rot, rot.y, glm::vec3(0.0, 1.0, 0.0));
+	new_rot = glm::rotate(new_rot, rot.z, glm::vec3(0.0, 0.0, 1.0));
+	
+	glm::mat4 new_trans = glm::mat4(1.0f);
+	new_trans = glm::translate(new_trans, pos);
+
+	cam.rotation = new_rot;
+	cam.translation = new_trans;
+}
+
 Demo::Demo(GLFWwindow* _window) {
 	window = _window;
+	shader_programme = 0;
 	uniTrans = 0;
 	cube_mesh = nullptr;
 	cube_model = model();
-	cube_count = 256;
+	cube_count = 128;
 }
 
 Demo::~Demo() {
@@ -32,7 +49,7 @@ const char* vertex_shader =
 "void main(){"
 "  v_texCoords = tex;"
 //"  gl_Position = trans * vec4(pos, 1.0);"
-"  gl_Position = model * view * projection * vec4(pos, 1.0);"
+"  gl_Position = projection * view * model * vec4(pos, 1.0);"
 "}";
 
 const char* fragment_shader =
@@ -84,7 +101,6 @@ void create_shaders(GLuint* shader_programme) {
 }
 
 int Demo::load_assets() {
-	GLuint shader_programme;
 	create_shaders(&shader_programme);
 	glUseProgram(shader_programme);
 	glUniform1i(glGetUniformLocation(shader_programme, "intexture"), 0);
@@ -102,6 +118,11 @@ int Demo::load_assets() {
 
 	GLuint model_id = 0;
 	cube_model = {model_id, mesh_id, texID, cube_mesh };
+
+	GLuint view = glGetUniformLocation(shader_programme, "view");
+	glm::mat4 view_trans = cam.get_transform();
+	glUniformMatrix4fv(view, 1, GL_FALSE, glm::value_ptr(view_trans));
+
 	for (int i = 0; i < cube_count; i++) {
 		model_instance* tInstance = nullptr;
 		tInstance = new model_instance(&cube_model, shader_programme, true);
@@ -109,7 +130,7 @@ int Demo::load_assets() {
 		rotations.push_back(glm::vec3(glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f)));
 		translations.push_back(glm::vec3(glm::linearRand(0.0f, 0.003f), glm::linearRand(0.0f, 0.003f), 0.0f));
 		tInstance->local_scale(glm::vec3(glm::linearRand(0.0f, 0.05f)));
-		tInstance->local_translate(glm::vec3(glm::linearRand(-0.75f, 0.75f), glm::linearRand(-0.75f, 0.75f), 0.0f));
+		tInstance->local_translate(glm::vec3(glm::linearRand(-0.75f, 0.75f), glm::linearRand(-0.75f, 0.75f), glm::linearRand(-0.1f, -1.0f)));
 	}
 
 	return 0;
@@ -133,17 +154,18 @@ void Demo::move_cubes() {
 	y_bounce += y_speed * y_dir;
 	for (int i = 0; i < cube_count; i++) {
 		instances[i]->local_rotate(rotations[i]);
-		glm::vec3 trans = { translations[i].x * x_dir, translations[i].y * y_dir, 0.0 };
-		instances[i]->local_translate(trans);
+		//glm::vec3 trans = { translations[i].x * x_dir, translations[i].y * y_dir, 0.0 };
+		//instances[i]->local_translate(trans);
 	}
 }
 
 int Demo::run() {
 	while (!glfwWindowShouldClose(window)) {
+		update_camera();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		move_cubes();
 		for (int i = 0; i < cube_count; i++) {
-			instances[i]->render();
+			instances[i]->render(cam.get_transform());
 		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();

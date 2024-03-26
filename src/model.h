@@ -25,5 +25,5 @@ struct model_instance {
 	void local_translate(glm::vec3 trans);
 	void local_scale(glm::vec3 scale);
 
-	void render();
+	void render(glm::mat4 cam_trans);
 };

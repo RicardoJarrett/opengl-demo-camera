@@ -30,22 +30,20 @@ glm::mat4 model_instance::get_local_transform() {
 	return local_transform;
 }
 
-void model_instance::render() {
+void model_instance::render(glm::mat4 cam_trans) {
 	if (model_p != nullptr) {
 
 		model_p->bind(shader_id);
 
 		if (draw_enabled == true) {
 			GLuint model = glGetUniformLocation(shader_id, "model");
-			GLuint view = glGetUniformLocation(shader_id, "view");
 			GLuint projection = glGetUniformLocation(shader_id, "projection");
+			GLuint view = glGetUniformLocation(shader_id, "view");
 			glm::mat4 local_trans = get_local_transform();
-			glm::mat4 world_trans = glm::mat4(1.0f);
-			world_trans = glm::translate(world_trans, glm::vec3(0.0, 0.0, -3.0));
-			glm::mat4 proj_trans = glm::mat4(1.0f);
-			//glm::mat4 proj_trans = glm::perspective(glm::radians(45.0f), (float)640 / (float)480, 0.01f, 1000.0f);
+			//glm::mat4 proj_trans = glm::mat4(1.0f);
+			glm::mat4 proj_trans = glm::perspective(glm::radians(45.0f), (float)640 / (float)480, 0.01f, 1000.0f);
 			glUniformMatrix4fv(model, 1, GL_FALSE, glm::value_ptr(local_trans));
-			glUniformMatrix4fv(view, 1, GL_FALSE, glm::value_ptr(world_trans));
+			glUniformMatrix4fv(view, 1, GL_FALSE, glm::value_ptr(cam_trans));
 			glUniformMatrix4fv(projection, 1, GL_FALSE, glm::value_ptr(proj_trans));
 			glDrawElements(GL_TRIANGLES, model_p->meshp->size, GL_UNSIGNED_INT, nullptr);
 		}

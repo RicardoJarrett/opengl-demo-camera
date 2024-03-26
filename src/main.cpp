@@ -13,9 +13,7 @@
 
 using namespace std;
 
-float x_pos = 0.0f;
-float y_pos = 0.0f;
-float z_pos = 0.0f;
+glm::vec3 pos, rot;
 
 float speed = 0.1f;
 
@@ -24,16 +22,42 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 	else if (key == GLFW_KEY_RIGHT && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		x_pos += speed;
+		if (mods == GLFW_MOD_CONTROL) {
+			rot.y += speed;
+		}
+		else {
+			pos.x -= speed;
+		}
 	}
 	else if (key == GLFW_KEY_LEFT && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		x_pos -= speed;
+		if (mods == GLFW_MOD_CONTROL) {
+			rot.y -= speed;
+		}
+		else {
+			pos.x += speed;
+		}
 	}
 	else if (key == GLFW_KEY_UP && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		z_pos += speed;
+		if (mods == GLFW_MOD_CONTROL) {
+			rot.x -= speed;
+		}
+		else if (mods == GLFW_MOD_SHIFT) {
+			pos.z += speed;
+		}
+		else {
+			pos.y -= speed;
+		}
 	}
 	else if (key == GLFW_KEY_DOWN && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		z_pos -= speed;
+		if (mods == GLFW_MOD_CONTROL) {
+			rot.x += speed;
+		}
+		else if (mods == GLFW_MOD_SHIFT) {
+			pos.z -= speed;
+		}
+		else {
+			pos.y += speed;
+		}
 	}
 }
 
