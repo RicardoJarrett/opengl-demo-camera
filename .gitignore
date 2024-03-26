@@ -396,3 +396,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+opengl-demo-camera.sln
+opengl-demo-camera.vcxproj
+opengl-demo-camera.vcxproj.filters
