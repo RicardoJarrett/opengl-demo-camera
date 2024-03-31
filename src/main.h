@@ -11,4 +11,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 int create_window(GLFWwindow** win);
 int init(GLFWwindow** window);
 
+void update_camera();
+
 int main();

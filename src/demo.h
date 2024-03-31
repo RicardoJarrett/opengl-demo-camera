@@ -21,12 +21,11 @@ public:
 	std::vector<glm::vec3> rotations;
 	std::vector<glm::vec3> translations;
 
-	camera cam;
+	camera* cam;
 
-	Demo(GLFWwindow* _window);
+	Demo(GLFWwindow* _window, camera* cam);
 	~Demo();
 	int load_assets();
 	int run();
 	void move_cubes();
-	void update_camera();
 };

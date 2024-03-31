@@ -7,24 +7,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
 
-extern glm::vec3 pos;
-extern glm::vec3 rot;
-
-void Demo::update_camera() {
-	glm::mat4 new_rot = glm::mat4(1.0f);
-	new_rot = glm::rotate(new_rot, rot.x, glm::vec3(1.0, 0.0, 0.0));
-	new_rot = glm::rotate(new_rot, rot.y, glm::vec3(0.0, 1.0, 0.0));
-	new_rot = glm::rotate(new_rot, rot.z, glm::vec3(0.0, 0.0, 1.0));
-	
-	glm::mat4 new_trans = glm::mat4(1.0f);
-	new_trans = glm::translate(new_trans, pos);
-
-	cam.rotation = new_rot;
-	cam.translation = new_trans;
-}
-
-Demo::Demo(GLFWwindow* _window) {
+Demo::Demo(GLFWwindow* _window, camera* _cam) {
 	window = _window;
+	cam = _cam;
 	shader_programme = 0;
 	uniTrans = 0;
 	cube_mesh = nullptr;
@@ -120,7 +105,7 @@ int Demo::load_assets() {
 	cube_model = {model_id, mesh_id, texID, cube_mesh };
 
 	GLuint view = glGetUniformLocation(shader_programme, "view");
-	glm::mat4 view_trans = cam.get_transform();
+	glm::mat4 view_trans = cam->get_transform();
 	glUniformMatrix4fv(view, 1, GL_FALSE, glm::value_ptr(view_trans));
 
 	for (int i = 0; i < cube_count; i++) {
@@ -161,11 +146,10 @@ void Demo::move_cubes() {
 
 int Demo::run() {
 	while (!glfwWindowShouldClose(window)) {
-		update_camera();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		move_cubes();
 		for (int i = 0; i < cube_count; i++) {
-			instances[i]->render(cam.get_transform());
+			instances[i]->render(cam->get_transform());
 		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();

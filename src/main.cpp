@@ -9,61 +9,83 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "camera.h"
 #include "demo.h"
+#include "controller.h"
 
 using namespace std;
+
+camera cam;
 
 glm::vec3 pos, rot;
 
 float speed = 0.1f;
 
+controller control;
+
+void update_camera() {
+	rot += glm::vec3(control.turn_x * speed, control.turn_y * speed, 0.0);
+	cam.rotate(rot);
+	cam.move_forward(speed * control.forward);
+	cam.strafe(speed * control.strafe);
+}
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	control.reset();
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
-	else if (key == GLFW_KEY_RIGHT && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		if (mods == GLFW_MOD_CONTROL) {
-			rot.y += speed;
+	bool pressed = false;
+	bool ctrl = false;
+	bool shift = false;
+
+	if ((action == GLFW_PRESS) || (action == GLFW_REPEAT)) {
+		pressed = true;
+	}
+	if (mods == GLFW_MOD_CONTROL) {
+		ctrl = true;
+	}
+	if (mods == GLFW_MOD_SHIFT) {
+		shift = true;
+	}
+	if (key == GLFW_KEY_RIGHT && pressed) {
+		if (ctrl) {
+			control.turn_y = 1;
 		}
 		else {
-			pos.x -= speed;
+			control.strafe = -1;
 		}
 	}
-	else if (key == GLFW_KEY_LEFT && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		if (mods == GLFW_MOD_CONTROL) {
-			rot.y -= speed;
+	else if (key == GLFW_KEY_LEFT && pressed) {
+		if (ctrl) {
+			control.turn_y = -1;
 		}
 		else {
-			pos.x += speed;
+			control.strafe = 1;
 		}
 	}
-	else if (key == GLFW_KEY_UP && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		if (mods == GLFW_MOD_CONTROL) {
-			rot.x -= speed;
-		}
-		else if (mods == GLFW_MOD_SHIFT) {
-			pos.z += speed;
+	else if (key == GLFW_KEY_UP && pressed) {
+		if (ctrl) {
+			control.turn_x = -1;
 		}
 		else {
-			pos.y -= speed;
+			control.forward = 1;
 		}
 	}
-	else if (key == GLFW_KEY_DOWN && ((action == GLFW_PRESS) || (action == GLFW_REPEAT))) {
-		if (mods == GLFW_MOD_CONTROL) {
-			rot.x += speed;
-		}
-		else if (mods == GLFW_MOD_SHIFT) {
-			pos.z -= speed;
+	else if (key == GLFW_KEY_DOWN && pressed) {
+		if (ctrl) {
+			control.turn_x = 1;
 		}
 		else {
-			pos.y += speed;
+			control.forward = -1;
 		}
 	}
+	update_camera();
 }
 
 int create_window(GLFWwindow** win) {
 	*win = glfwCreateWindow(640, 480, "Test", NULL, NULL);	//windowed
-	//GLFWwindow* window = glfwCreateWindow(640, 480, "Test", glfwGetPrimaryMonitor(), NULL);	//fullscreen
+	//*win = glfwCreateWindow(640, 480, "Test", glfwGetPrimaryMonitor(), NULL);	//fullscreen
 	if (!*win) {
 		printf("ERROR: Unable to create Window.");
 		return 0;
@@ -108,7 +130,7 @@ int main() {
 		return -1;
 	}
 	
-	Demo demo(window);
+	Demo demo(window, &cam);
 	int load_return = demo.load_assets();
 	if (load_return < 0) {
 		std::cout << "Load: " << load_return << "\n";
