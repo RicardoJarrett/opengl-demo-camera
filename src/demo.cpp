@@ -90,7 +90,7 @@ int Demo::load_assets() {
 	glUseProgram(shader_programme);
 	glUniform1i(glGetUniformLocation(shader_programme, "intexture"), 0);
 	
-	std::string texPath = "assets\\cube.png";
+	std::string texPath = "assets\\cube_2.png";
 	GLuint texID = 0;
 	loader::load_tex(texPath, &texID);
 
