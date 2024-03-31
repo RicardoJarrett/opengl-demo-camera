@@ -3,6 +3,7 @@
 
 camera::camera() {
 	rotation = glm::mat4(1.0f);
+	v3Rot = glm::vec3(1.0, 1.0, 1.0);
 	translation = glm::mat4(1.0f);
 	view_angle = glm::radians(45.0f);
 	width = 480.0f;
@@ -38,6 +39,7 @@ void camera::translate(glm::vec3 trans) {
 }
 
 void camera::move_forward(float speed) {
+	//std::cout << speed << "\n";
 	glm::mat4 inverted = glm::inverse(get_transform());
 	glm::vec3 forward = normalize(glm::vec3(inverted[2]));
 	forward *= speed;

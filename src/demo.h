@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "model.h"
 #include "camera.h"
+#include "controller.h"
 
 #include <GLFW/glfw3.h>
 #include <vector>
@@ -22,10 +23,13 @@ public:
 	std::vector<glm::vec3> translations;
 
 	camera* cam;
+	controller* control;
+	bool cube_movement;
 
-	Demo(GLFWwindow* _window, camera* cam);
+	Demo(GLFWwindow* _window, camera* cam, controller* control);
 	~Demo();
 	int load_assets();
 	int run();
 	void move_cubes();
+	void update_camera(glm::vec3 rot, float speed);
 };

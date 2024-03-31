@@ -15,6 +15,8 @@
 
 using namespace std;
 
+Demo* demo;
+
 camera cam;
 
 glm::vec3 pos, rot;
@@ -24,6 +26,7 @@ float speed = 0.1f;
 controller control;
 
 void update_camera() {
+	control.process_input();
 	rot += glm::vec3(control.turn_x * speed, control.turn_y * speed, 0.0);
 	cam.rotate(rot);
 	cam.move_forward(speed * control.forward);
@@ -80,7 +83,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			control.forward = -1;
 		}
 	}
-	update_camera();
+	
+	demo->update_camera(rot, speed);
 }
 
 int create_window(GLFWwindow** win) {
@@ -123,19 +127,18 @@ int init(GLFWwindow** window) {
 }
 
 int main() {
-	
 	GLFWwindow* window;
 	if (init(&window) < 0) {
 		cout << "Error initialising.\n";
 		return -1;
 	}
 	
-	Demo demo(window, &cam);
-	int load_return = demo.load_assets();
+	demo = new Demo(window, &cam, &control);
+	int load_return = demo->load_assets();
 	if (load_return < 0) {
 		std::cout << "Load: " << load_return << "\n";
 	}
-	int demo_return = demo.run();
+	int demo_return = demo->run();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

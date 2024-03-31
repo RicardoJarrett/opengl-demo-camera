@@ -171,7 +171,6 @@ void loader::load_tex(std::string path, GLuint* texID) {
 
 	unsigned char* image =
 		stbi_load(path.c_str(), &width, &height, &channels, 0);
-	std::cout << "whc: " << width << " " << height << " " << channels << "\n";
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -180,7 +179,6 @@ void loader::load_tex(std::string path, GLuint* texID) {
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	if (image) {
-		std::cout << "Image created\n";
 		stbi_image_free(image);
 
 	}

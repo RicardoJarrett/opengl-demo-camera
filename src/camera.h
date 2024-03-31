@@ -4,6 +4,7 @@
 
 struct camera {
 	glm::mat4 rotation, translation;
+	glm::vec3 v3Rot;
 	float view_angle, width, height, depth;
 
 	camera();

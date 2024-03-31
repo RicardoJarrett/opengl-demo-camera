@@ -7,14 +7,18 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
 
-Demo::Demo(GLFWwindow* _window, camera* _cam) {
+#include <stdlib.h>
+
+Demo::Demo(GLFWwindow* _window, camera* _cam, controller* _control) {
 	window = _window;
 	cam = _cam;
+	control = _control;
 	shader_programme = 0;
 	uniTrans = 0;
 	cube_mesh = nullptr;
 	cube_model = model();
-	cube_count = 128;
+	cube_count = 512;
+	cube_movement = true;
 }
 
 Demo::~Demo() {
@@ -139,15 +143,38 @@ void Demo::move_cubes() {
 	y_bounce += y_speed * y_dir;
 	for (int i = 0; i < cube_count; i++) {
 		instances[i]->local_rotate(rotations[i]);
-		//glm::vec3 trans = { translations[i].x * x_dir, translations[i].y * y_dir, 0.0 };
-		//instances[i]->local_translate(trans);
+		glm::vec3 trans = { translations[i].x * x_dir, translations[i].y * y_dir, 0.0 };
+		instances[i]->local_translate(trans);
+	}
+}
+
+void button_display() {
+	system("CLS");
+	int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
+	int b_count, a_count;
+	const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &b_count);
+	const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &a_count);
+	std::cout << "Button\n";
+	for (int btn = 0; btn < b_count; btn++) {
+		std::cout << buttons[btn] << "\n";
+	}
+	std::cout << "Axis\n";
+	for (int axis = 0; axis < a_count; axis++) {
+		std::cout << axes[axis] << "\n";
 	}
 }
 
 int Demo::run() {
 	while (!glfwWindowShouldClose(window)) {
+		update_camera(cam->v3Rot, 0.1);
+		//button_display();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		move_cubes();
+		if (control->buttons[control->a]) {
+			cube_movement = !cube_movement;
+		}
+		if (cube_movement) {
+			move_cubes();
+		}
 		for (int i = 0; i < cube_count; i++) {
 			instances[i]->render(cam->get_transform());
 		}
@@ -155,4 +182,13 @@ int Demo::run() {
 		glfwPollEvents();
 	}
 	return 0;
+}
+
+void Demo::update_camera(glm::vec3 rot, float speed) {
+	control->process_input();
+	rot += glm::vec3(control->turn_x * speed, control->turn_y * speed, 0.0);
+	cam->rotate(rot);
+	cam->move_forward(speed * control->forward);
+	cam->strafe(speed * control->strafe);
+	cam->v3Rot = rot;
 }
